@@ -314,11 +314,23 @@
             padding: 2rem;
             border-radius: 1rem;
             text-align: center;
-            z-index: 100;
+            z-index: 1000;
             display: none;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             border: 2px solid white;
-            min-width: 300px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        #feedback h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        #feedback p {
+            font-size: 1.1rem;
+            font-weight: 500;
         }
 
         .feedback-correct { background: rgba(16, 185, 129, 0.9); }
@@ -406,10 +418,28 @@
 
         /* Mobile Adjustments */
         @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            header { margin-bottom: 1.5rem; }
+            h1 { font-size: 1.8rem; }
+            .professor-info { font-size: 0.9rem; }
+            
+            .card { padding: 1.25rem; }
+            
             .mode-selection { grid-template-columns: 1fr; }
             .result-stats { grid-template-columns: 1fr; }
-            .container { padding: 1rem; }
-            h1 { font-size: 1.8rem; }
+            
+            .question-text { font-size: 1.1rem; margin-bottom: 1.5rem; }
+            .option-btn { padding: 0.8rem 1rem; font-size: 0.95rem; }
+            
+            .quiz-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .quiz-header > div:last-child { text-align: left; }
+            
+            #feedback {
+                padding: 1.5rem;
+                width: 85%;
+            }
+            #feedback h2 { font-size: 1.5rem; }
+            #feedback p { font-size: 1rem; }
         }
     </style>
 </head>
@@ -791,6 +821,7 @@
                 streakInfo.style.display = 'none';
             }
 
+            const delay = isCorrect ? 2000 : 4000;
             setTimeout(() => {
                 gameState.currentIndex++;
                 if (gameState.currentIndex < 10) {
@@ -798,7 +829,7 @@
                 } else {
                     finishQuiz();
                 }
-            }, 2000);
+            }, delay);
         }
 
         // FEEDBACK VISUAL
@@ -810,7 +841,8 @@
                 `<h2>CORRETO!</h2>${gameState.mode === 'competitivo' ? `<p>+${points} pontos</p>` : ''}` : 
                 `<h2>INCORRETO</h2><p>A resposta certa era a alternativa ${gameState.currentQuestions[gameState.currentIndex].correta.toUpperCase()}</p>`;
             
-            setTimeout(() => { el.style.display = 'none'; }, 1800);
+            const displayDuration = isCorrect ? 1800 : 3800;
+            setTimeout(() => { el.style.display = 'none'; }, displayDuration);
         }
 
         // FINALIZAR QUIZ
