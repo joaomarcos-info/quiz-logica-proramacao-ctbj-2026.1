@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Lógica de Programação - Colégio Técnico de Bom Jesus</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #7c3aed;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --gold: #fbbf24;
+            --silver: #e2e8f0;
+            --bronze: #d97706;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* Telas */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .professor-info {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        /* Formulário Inicial */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .mode-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .mode-card {
+            border: 2px solid #334155;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .mode-card.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .mode-card h3 { margin-bottom: 0.5rem; }
+        .mode-card p { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Regras */
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .rule-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .rule-item strong { color: var(--accent); display: block; margin-bottom: 0.25rem; }
+
+        /* Botões */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Quiz Interface */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #334155;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-category {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #334155;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .option-btn.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+        }
+
+        .option-btn.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+        }
+
+        .option-prefix {
+            font-weight: 800;
+            margin-right: 1rem;
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Timer */
+        .timer-container {
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .timer-bar-bg {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .timer-bar-fill {
+            height: 100%;
+            background: var(--danger);
+            width: 100%;
+        }
+
+        /* Feedback Overlay */
+        #feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            min-width: 300px;
+        }
+
+        .feedback-correct { background: rgba(16, 185, 129, 0.9); }
+        .feedback-wrong { background: rgba(239, 68, 68, 0.9); }
+
+        /* Final Screen */
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Ranking */
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .ranking-table th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid #334155;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .ranking-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .rank-1 { color: var(--gold); font-weight: bold; }
+        .rank-2 { color: var(--silver); font-weight: bold; }
+        .rank-3 { color: var(--bronze); font-weight: bold; }
+
+        .medal { font-size: 1.2rem; margin-right: 0.5rem; }
+
+        /* Checkbox Custom */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Níveis */
+        .level-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            background: var(--secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .mode-selection { grid-template-columns: 1fr; }
+            .result-stats { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- TELA INICIAL -->
+        <div id="start-screen" class="screen active">
+            <header>
+                <h1>Lógica de Programação</h1>
+                <p class="professor-info">Prof. João Marcos de Sousa Rosal | Colégio Técnico de Bom Jesus</p>
+            </header>
+
+            <div class="card animate-fade">
+                <div class="input-group">
+                    <label for="student-name">Nome do Aluno:</label>
+                    <input type="text" id="student-name" placeholder="Digite seu nome completo...">
+                </div>
+
+                <label>Modo de Uso:</label>
+                <div class="mode-selection">
+                    <div class="mode-card selected" onclick="selectMode('estudos', this)">
+                        <h3>📚 Estudos</h3>
+                        <p>Sem tempo, feedback imediato e focado no aprendizado.</p>
+                    </div>
+                    <div class="mode-card" onclick="selectMode('competitivo', this)">
+                        <h3>🏆 Competitivo</h3>
+                        <p>Com pontos, bônus de rapidez e ranking oficial.</p>
+                    </div>
+                </div>
+
+                <div id="ranking-option" style="display: none;">
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="participate-ranking" checked>
+                        <span>Participar da pontuação e ranking competitivo?</span>
+                    </label>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="startQuiz()">INICIAR QUIZ</button>
+                </div>
+            </div>
+
+            <div class="card animate-fade" style="animation-delay: 0.2s;">
+                <h2 style="margin-bottom: 1rem; color: var(--accent);">📜 Regras do Quiz</h2>
+                <div class="rules-grid">
+                    <div class="rule-item">
+                        <strong>Questões</strong>
+                        Sorteio aleatório de 10 questões a cada tentativa.
+                    </div>
+                    <div class="rule-item">
+                        <strong>Modo Estudos</strong>
+                        Aprenda no seu ritmo. Veja a resposta correta na hora.
+                    </div>
+                    <div class="rule-item">
+                        <strong>Modo Competitivo</strong>
+                        Ganhe pontos por acerto e bônus por rapidez e sequência!
+                    </div>
+                    <div class="rule-item">
+                        <strong>Sequência (Streak)</strong>
+                        3, 5 ou 8 acertos seguidos garantem bônus massivos de pontos.
+                    </div>
+                    <div class="rule-item">
+                        <strong>Rapidez</strong>
+                        Responda rápido questões com tempo para ganhar até +10 pontos extras.
+                    </div>
+                    <div class="rule-item">
+                        <strong>Níveis</strong>
+                        Suba de nível: de "Iniciante" até "Especialista em Algoritmos".
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DO QUIZ -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div>
+                    <div id="display-student-name" style="font-weight: 800; color: var(--primary);">ALUNO</div>
+                    <div id="display-mode" class="status-badge">MODO</div>
+                </div>
+                <div style="text-align: right;">
+                    <div id="display-score-label" style="font-size: 0.8rem; color: var(--text-muted);">PONTOS</div>
+                    <div id="display-score" style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">0</div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+
+            <div class="card">
+                <div id="timer-container" class="timer-container">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.3rem;">
+                        <span>TEMPO RESTANTE</span>
+                        <span id="timer-text">00s</span>
+                    </div>
+                    <div class="timer-bar-bg">
+                        <div id="timer-bar" class="timer-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div id="question-info" class="question-category">CATEGORIA</div>
+                <div id="question-counter" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Questão 1 de 10</div>
+                <div id="question-text" class="question-text">Carregando pergunta...</div>
+
+                <div id="options-container" class="options-grid">
+                    <!-- Opções inseridas via JS -->
+                </div>
+            </div>
+
+            <div id="streak-info" style="text-align: center; font-weight: 800; color: var(--secondary); display: none;">
+                🔥 COMBO: <span id="current-streak">0</span> ACERTOS SEGUIDOS!
+            </div>
+        </div>
+
+        <!-- TELA DE RESULTADOS -->
+        <div id="result-screen" class="screen">
+            <header>
+                <h1>Resultado Final</h1>
+                <p id="result-message">Parabéns pelo esforço!</p>
+            </header>
+
+            <div class="card">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div id="result-level" class="level-badge">NÍVEL</div>
+                    <h2 id="result-name" style="margin-top: 0.5rem;">NOME DO ALUNO</h2>
+                </div>
+
+                <div class="result-stats">
+                    <div class="stat-card">
+                        <span id="res-score" class="stat-value">0</span>
+                        <span class="stat-label">Pontos Totais</span>
+                    </div>
+                    <div class="stat-card">
+                        <span id="res-accuracy" class="stat-value">0%</span>
+                        <span class="stat-label">Aproveitamento</span>
+                    </div>
+                    <div class="stat-card">
+                        <span id="res-correct" class="stat-value">0</span>
+                        <span class="stat-label">Acertos</span>
+                    </div>
+                    <div class="stat-card">
+                        <span id="res-streak" class="stat-value">0</span>
+                        <span class="stat-label">Maior Sequência</span>
+                    </div>
+                </div>
+
+                <div id="achievements-container" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted);">CONQUISTAS OBTIDAS:</h3>
+                    <div id="achievements-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        <!-- Conquistas via JS -->
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="restartGame()">JOGAR NOVAMENTE</button>
+            </div>
+
+            <div id="ranking-card" class="card">
+                <h2 style="margin-bottom: 1rem; color: var(--gold);">🏆 Ranking Global (Local)</h2>
+                <div style="overflow-x: auto;">
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Aluno</th>
+                                <th>Pontos</th>
+                                <th>Acertos</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-body">
+                            <!-- Ranking via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback"></div>
+
+    <script>
+        // BASE DE DADOS JSON
+        const questionsDB = [ { "id": 1, "categoria": "estrutura_basica", "pergunta": "Em Portugol, a palavra \"algoritmo\" é usada para:", "alternativas": { "a": "Encerrar o programa", "b": "Dar nome ao algoritmo", "c": "Declarar variáveis", "d": "Ler valores", "e": "Fazer um teste lógico" }, "correta": "b", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 2, "categoria": "estrutura_basica", "pergunta": "A seção \"var\" serve para:", "alternativas": { "a": "Exibir resultados", "b": "Executar laços", "c": "Criar decisões", "d": "Declarar variáveis", "e": "Finalizar o algoritmo" }, "correta": "d", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 3, "categoria": "estrutura_basica", "pergunta": "O comando \"inicio\" indica:", "alternativas": { "a": "O começo do bloco principal", "b": "O fim das variáveis", "c": "Uma estrutura de repetição", "d": "Uma operação matemática", "e": "A leitura de dados" }, "correta": "a", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 4, "categoria": "estrutura_basica", "pergunta": "O comando \"fimalgoritmo\" é usado para:", "alternativas": { "a": "Declarar um texto", "b": "Testar uma condição", "c": "Repetir instruções", "d": "Ler um valor", "e": "Encerrar o algoritmo" }, "correta": "e", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 5, "categoria": "entrada_saida", "pergunta": "Qual comando é usado para receber um valor digitado pelo usuário?", "alternativas": { "a": "escreva", "b": "inicio", "c": "leia", "d": "var", "e": "fimalgoritmo" }, "correta": "c", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 6, "categoria": "entrada_saida", "pergunta": "O comando \"escreva\" é usado para:", "alternativas": { "a": "Repetir um bloco", "b": "Mostrar dados na tela", "c": "Testar uma expressão", "d": "Declarar uma variável", "e": "Criar um contador" }, "correta": "b", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 7, "categoria": "tipos", "pergunta": "Qual tipo é mais apropriado para guardar a idade de uma pessoa?", "alternativas": { "a": "literal", "b": "real", "c": "logico", "d": "inteiro", "e": "texto" }, "correta": "d", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 8, "categoria": "tipos", "pergunta": "Qual tipo é mais indicado para armazenar um nome?", "alternativas": { "a": "literal", "b": "inteiro", "c": "real", "d": "logico", "e": "contador" }, "correta": "a", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 9, "categoria": "tipos", "pergunta": "Qual tipo é mais adequado para armazenar um valor com casas decimais?", "alternativas": { "a": "inteiro", "b": "logico", "c": "literal", "d": "texto", "e": "real" }, "correta": "e", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 10, "categoria": "tipos", "pergunta": "Qual tipo representa um valor verdadeiro ou falso?", "alternativas": { "a": "literal", "b": "inteiro", "c": "logico", "d": "real", "e": "decimal" }, "correta": "c", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 11, "categoria": "atribuicao", "pergunta": "No Portugol, o símbolo \"<-\" significa:", "alternativas": { "a": "Comparação", "b": "Atribuição", "c": "Multiplicação", "d": "Leitura", "e": "Repetição" }, "correta": "b", "nivel": "facil", "pontos": 10, "usarTempo": true, "tempoLimite": 20, "bonusRapidezAtivo": true }, { "id": 12, "categoria": "operadores_aritmeticos", "pergunta": "Qual operador é usado para calcular o resto de uma divisão?", "alternativas": { "a": "+", "b": "/", "c": "*", "d": "mod", "e": "-" }, "correta": "d", "nivel": "facil", "pontos": 10, "usarTempo": true, "tempoLimite": 20, "bonusRapidezAtivo": true }, { "id": 13, "categoria": "operadores_aritmeticos", "pergunta": "Qual operador representa a multiplicação?", "alternativas": { "a": "*", "b": "+", "c": "/", "d": "-", "e": "mod" }, "correta": "a", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 14, "categoria": "operadores_relacionais", "pergunta": "O operador \">=\" significa:", "alternativas": { "a": "Menor que", "b": "Maior que", "c": "Menor ou igual a", "d": "Diferente de", "e": "Maior ou igual a" }, "correta": "e", "nivel": "facil", "pontos": 10, "usarTempo": true, "tempoLimite": 20, "bonusRapidezAtivo": true }, { "id": 15, "categoria": "operadores_relacionais", "pergunta": "Uma expressão relacional produz como resultado:", "alternativas": { "a": "Apenas texto", "b": "Apenas número decimal", "c": "Verdadeiro ou falso", "d": "Somente inteiro", "e": "Um novo algoritmo" }, "correta": "c", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 16, "categoria": "operadores_logicos", "pergunta": "O operador lógico \"e\" exige que:", "alternativas": { "a": "Só a primeira parte seja verdadeira", "b": "As duas partes sejam verdadeiras", "c": "Só a segunda parte seja verdadeira", "d": "Uma parte seja falsa", "e": "O valor seja inteiro" }, "correta": "b", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 17, "categoria": "operadores_logicos", "pergunta": "O operador lógico \"ou\" será verdadeiro quando:", "alternativas": { "a": "As duas partes forem falsas", "b": "A primeira parte for falsa", "c": "A segunda parte for falsa", "d": "Pelo menos uma parte for verdadeira", "e": "Nenhuma comparação existir" }, "correta": "d", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 18, "categoria": "se", "pergunta": "A estrutura \"se\" é usada para:", "alternativas": { "a": "Executar um bloco quando a condição for verdadeira", "b": "Repetir um bloco várias vezes", "c": "Declarar variáveis", "d": "Encerrar o algoritmo", "e": "Criar um contador" }, "correta": "a", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 19, "categoria": "se", "pergunta": "Na estrutura \"se\", o bloco interno será executado quando:", "alternativas": { "a": "A condição for falsa", "b": "O algoritmo terminar", "c": "O usuário não digitar nada", "d": "Existir uma variável real", "e": "A condição for verdadeira" }, "correta": "e", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 20, "categoria": "se_senao", "pergunta": "A estrutura \"se...senao\" é usada quando queremos:", "alternativas": { "a": "Declarar variáveis", "b": "Exibir mensagens fixas", "c": "Escolher entre dois caminhos", "d": "Executar um laço fixo", "e": "Apagar uma variável" }, "correta": "c", "nivel": "facil", "pontos": 10, "usarTempo": true, "tempoLimite": 20, "bonusRapidezAtivo": true }, { "id": 21, "categoria": "se_senao", "pergunta": "O bloco do \"senao\" será executado quando:", "alternativas": { "a": "O algoritmo iniciar", "b": "A condição do \"se\" for falsa", "c": "A condição do \"se\" for verdadeira", "d": "O usuário repetir o teste", "e": "O valor for decimal" }, "correta": "b", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 22, "categoria": "se", "pergunta": "Qual situação combina melhor com o uso de \"se\" simples?", "alternativas": { "a": "Ler exatamente dez números", "b": "Somar dois valores sempre", "c": "Repetir até o usuário parar", "d": "Mostrar uma mensagem apenas se a nota for suficiente", "e": "Contar de um até cem" }, "correta": "d", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 23, "categoria": "se_senao", "pergunta": "Qual situação combina melhor com o uso de \"se...senao\"?", "alternativas": { "a": "Mostrar \"aprovado\" ou \"reprovado\"", "b": "Ler apenas um número", "c": "Declarar uma variável inteira", "d": "Escrever um título", "e": "Finalizar o algoritmo" }, "correta": "a", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 24, "categoria": "se_senao", "pergunta": "Quantos caminhos principais existem em uma estrutura \"se...senao\"?", "alternativas": { "a": "Quatro", "b": "Cinco", "c": "Um", "d": "Três", "e": "Dois" }, "correta": "e", "nivel": "facil", "pontos": 10, "usarTempo": true, "tempoLimite": 20, "bonusRapidezAtivo": true }, { "id": 25, "categoria": "interpretacao", "pergunta": "Se um algoritmo possui a condição \"se idade >= 18\" e a idade vale 20, o resultado do teste será:", "alternativas": { "a": "Texto", "b": "Nulo", "c": "Verdadeiro", "d": "Incorreto", "e": "Falso" }, "correta": "c", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 26, "categoria": "enquanto", "pergunta": "A estrutura \"enquanto\" é usada para:", "alternativas": { "a": "Escolher entre duas opções", "b": "Repetir enquanto a condição for verdadeira", "c": "Declarar textos", "d": "Encerrar o programa", "e": "Atribuir valores" }, "correta": "b", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 27, "categoria": "enquanto", "pergunta": "Na estrutura \"enquanto\", a condição é verificada:", "alternativas": { "a": "Depois do laço", "b": "No fim do algoritmo", "c": "No momento da declaração", "d": "Antes de entrar no laço", "e": "Apenas uma vez no final" }, "correta": "d", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 28, "categoria": "enquanto", "pergunta": "Qual estrutura pode não executar nenhuma vez?", "alternativas": { "a": "enquanto", "b": "repita...ate", "c": "se...senao", "d": "algoritmo", "e": "var" }, "correta": "a", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 29, "categoria": "enquanto", "pergunta": "Qual situação combina melhor com o uso de \"enquanto\"?", "alternativas": { "a": "Declarar uma variável", "b": "Mostrar um título apenas uma vez", "c": "Escolher entre aprovado e reprovado", "d": "Executar um bloco enquanto o usuário não quiser sair", "e": "Dar nome ao algoritmo" }, "correta": "e", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 30, "categoria": "enquanto", "pergunta": "Em um laço \"enquanto\", a variável de controle geralmente é atualizada para:", "alternativas": { "a": "Mudar o nome do algoritmo", "b": "Criar um novo tipo", "c": "Evitar repetição infinita", "d": "Substituir o comando leia", "e": "Declarar variáveis" }, "correta": "c", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 31, "categoria": "interpretacao", "pergunta": "Considere x <- 0 e o laço \"enquanto x < 3 faca x <- x + 1\". Quantas vezes o bloco será executado?", "alternativas": { "a": "3", "b": "4", "c": "1", "d": "2", "e": "5" }, "correta": "a", "nivel": "dificil", "pontos": 20, "usarTempo": true, "tempoLimite": 15, "bonusRapidezAtivo": true }, { "id": 32, "categoria": "interpretacao", "pergunta": "Considere x <- 5 e o laço \"enquanto x < 5 faca ...\". Quantas vezes o bloco será executado?", "alternativas": { "a": "Uma vez", "b": "Duas vezes", "c": "Cinco vezes", "d": "Nenhuma vez", "e": "Quatro vezes" }, "correta": "d", "nivel": "dificil", "pontos": 20, "usarTempo": true, "tempoLimite": 15, "bonusRapidezAtivo": true }, { "id": 33, "categoria": "repita_ate", "pergunta": "A estrutura \"repita...ate\" é usada para:", "alternativas": { "a": "Repetir o bloco e testar a parada no final", "b": "Escolher entre duas alternativas", "c": "Declarar variáveis", "d": "Fazer apenas contas", "e": "Encerrar o programa" }, "correta": "a", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 34, "categoria": "repita_ate", "pergunta": "No \"repita...ate\", a condição é verificada:", "alternativas": { "a": "Antes do bloco", "b": "Na declaração das variáveis", "c": "Durante a leitura", "d": "Ao iniciar o algoritmo", "e": "No final do laço" }, "correta": "e", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 35, "categoria": "repita_ate", "pergunta": "Uma característica importante do \"repita...ate\" é:", "alternativas": { "a": "Nunca usar condição", "b": "Funcionar só com inteiros", "c": "Executar ao menos uma vez", "d": "Encerrar antes do bloco", "e": "Ter contador obrigatório" }, "correta": "c", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 36, "categoria": "repita_ate", "pergunta": "Qual situação combina melhor com o uso de \"repita...ate\"?", "alternativas": { "a": "Somar dois números uma única vez", "b": "Mostrar um menu e repetir até o usuário escolher sair", "c": "Declarar um texto", "d": "Testar apenas se a nota é maior que sete", "e": "Exibir o nome do algoritmo" }, "correta": "b", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 37, "categoria": "interpretacao", "pergunta": "Considere x <- 0 e o laço \"repita x <- x + 1 ate x = 2\". Quantas vezes o bloco será executado?", "alternativas": { "a": "3", "b": "1", "c": "4", "d": "0", "e": "2" }, "correta": "e", "nivel": "dificil", "pontos": 20, "usarTempo": true, "tempoLimite": 15, "bonusRapidezAtivo": true }, { "id": 38, "categoria": "repita_ate", "pergunta": "O laço \"repita...ate\" termina quando a condição fica:", "alternativas": { "a": "Falsa", "b": "Indefinida", "c": "Numérica", "d": "Vazia", "e": "Verdadeira" }, "correta": "e", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 39, "categoria": "para", "pergunta": "A estrutura \"para\" é mais indicada quando:", "alternativas": { "a": "Há duas escolhas", "b": "O número de repetições é conhecido", "c": "Queremos ler um texto", "d": "Não existe contador", "e": "A condição é opcional" }, "correta": "b", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 40, "comando": "para i de 1 ate 5", "pergunta": "No comando \"para i de 1 ate 5\", a variável \"i\" funciona como:", "alternativas": { "a": "Mensagem", "b": "Texto", "c": "Operador", "d": "Condição", "e": "Contador" }, "correta": "e", "nivel": "facil", "pontos": 10, "usarTempo": true, "tempoLimite": 20, "bonusRapidezAtivo": true }, { "id": 41, "categoria": "para", "pergunta": "Qual situação combina melhor com o uso de \"para\"?", "alternativas": { "a": "Ler exatamente dez valores", "b": "Esperar o usuário decidir parar", "c": "Executar até que uma condição mude", "d": "Escolher entre dois blocos", "e": "Criar um tipo lógico" }, "correta": "a", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 42, "categoria": "para", "pergunta": "A palavra \"passo\" na estrutura \"para\" indica:", "alternativas": { "a": "O tipo da variável", "b": "O fim do algoritmo", "c": "A saída do programa", "d": "O valor de incremento ou decremento", "e": "A leitura dos dados" }, "correta": "d", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 43, "categoria": "interpretacao", "pergunta": "No laço \"para i de 1 ate 4 faca escreva(i)\", quantas vezes o comando será executado?", "alternativas": { "a": "4", "b": "3", "c": "5", "d": "2", "e": "1" }, "correta": "a", "nivel": "dificil", "pontos": 20, "usarTempo": true, "tempoLimite": 15, "bonusRapidezAtivo": true }, { "id": 44, "categoria": "para", "pergunta": "Quando usamos \"passo -1\" na estrutura \"para\", o contador varia de forma:", "alternativas": { "a": "Crescente", "b": "Aleatória", "c": "Fixa", "d": "Decrescente", "e": "Nula" }, "correta": "d", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 45, "categoria": "interpretacao", "pergunta": "Qual o valor final de soma após: soma <- 0; para i de 1 ate 3 faca soma <- soma + i?", "alternativas": { "a": "3", "b": "6", "c": "1", "d": "4", "e": "10" }, "correta": "b", "nivel": "dificil", "pontos": 20, "usarTempo": true, "tempoLimite": 15, "bonusRapidezAtivo": true }, { "id": 46, "categoria": "operadores_logicos", "pergunta": "O operador lógico \"nao\" serve para:", "alternativas": { "a": "Somar valores", "b": "Inverter o valor lógico", "c": "Multiplicar", "d": "Ler dados", "e": "Repetir o bloco" }, "correta": "b", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 47, "categoria": "operadores_logicos", "pergunta": "Se uma condição é verdadeira, o resultado de \"nao verdadeira\" é:", "alternativas": { "a": "Verdadeiro", "b": "Falso", "c": "Indefinido", "d": "Decimal", "e": "Texto" }, "correta": "b", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 48, "categoria": "interpretacao", "pergunta": "Se um algoritmo possui \"se nota >= 7 entao escreva(\\\"Aprovado\\\") senao escreva(\\\"Reprovado\\\")\" e a nota vale 5, a saída será:", "alternativas": { "a": "Reprovado", "b": "Aprovado", "c": "Nota", "d": "Nenhuma", "e": "Verdadeiro" }, "correta": "a", "nivel": "dificil", "pontos": 20, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 49, "categoria": "interpretacao", "pergunta": "Se um algoritmo possui apenas \"se x > 0 entao escreva(\\\"Positivo\\\")\" e x vale -2, então:", "alternativas": { "a": "Escreve Positivo", "b": "Escreve Negativo", "c": "Escreve Zero", "d": "Repete o teste", "e": "Nenhum bloco é executado" }, "correta": "e", "nivel": "dificil", "pontos": 20, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 50, "categoria": "operadores_aritmeticos", "pergunta": "Qual será o valor de resultado após \"resultado <- 4 + 3 * 2\"?", "alternativas": { "a": "12", "b": "14", "c": "10", "d": "7", "e": "8" }, "correta": "c", "nivel": "dificil", "pontos": 20, "usarTempo": true, "tempoLimite": 15, "bonusRapidezAtivo": true }, { "id": 51, "categoria": "operadores_aritmeticos", "pergunta": "Qual é o resultado de \"10 mod 3\"?", "alternativas": { "a": "1", "b": "3", "c": "0", "d": "10", "e": "7" }, "correta": "a", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 52, "categoria": "operadores_relacionais", "pergunta": "Qual operador verifica se dois valores são diferentes?", "alternativas": { "a": "=", "b": ">=", "c": "<=", "d": "<>", "e": "mod" }, "correta": "d", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 53, "categoria": "operadores_relacionais", "pergunta": "No teste \"nota >= 7\", o valor 7 faz a condição ficar:", "alternativas": { "a": "Verdadeira", "b": "Falsa", "c": "Incorreta", "d": "Nula", "e": "Textual" }, "correta": "a", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 54, "categoria": "declaracao", "pergunta": "Qual opção representa corretamente a declaração de duas variáveis inteiras?", "alternativas": { "a": "x <- inteiro e y <- inteiro", "b": "leia(x, y): inteiro", "c": "algoritmo x, y inteiro", "d": "inicio x y inteiro", "e": "x, y: inteiro" }, "correta": "e", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 55, "categoria": "entrada_saida", "pergunta": "Qual linha lê um valor para a variável idade?", "alternativas": { "a": "escreva(idade)", "b": "idade <- escreva()", "c": "leia(idade)", "d": "idade: leia", "e": "inicio(idade)" }, "correta": "c", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 56, "categoria": "boas_praticas", "pergunta": "A indentação em algoritmos ajuda principalmente a:", "alternativas": { "a": "Melhorar a leitura do código", "b": "Trocar o tipo das variáveis", "c": "Executar mais rápido", "d": "Eliminar operadores", "e": "Criar laços automáticos" }, "correta": "a", "nivel": "facil", "pontos": 10, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 57, "categoria": "boas_praticas", "pergunta": "Escolher nomes claros para variáveis ajuda porque:", "alternativas": { "a": "Reduz o tamanho do algoritmo", "b": "Dispensa o uso de leia", "c": "Torna o código mais difícil", "d": "Facilita o entendimento do algoritmo", "e": "Remove a necessidade de condições" }, "correta": "d", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 58, "categoria": "escolha_estrutura", "pergunta": "Qual estrutura é mais adequada para um menu que deve aparecer pelo menos uma vez?", "alternativas": { "a": "repita...ate", "b": "se", "c": "var", "d": "algoritmo", "e": "fimalgoritmo" }, "correta": "a", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true }, { "id": 59, "categoria": "escolha_estrutura", "pergunta": "Qual estrutura é mais adequada para verificar se um aluno foi aprovado ou reprovado?", "alternativas": { "a": "para", "b": "enquanto", "c": "repita...ate", "d": "var", "e": "se...senao" }, "correta": "e", "nivel": "medio", "pontos": 15, "usarTempo": false, "tempoLimite": null, "bonusRapidezAtivo": false }, { "id": 60, "categoria": "escolha_estrutura", "pergunta": "Qual estrutura é mais adequada para exibir os números de 1 até 10?", "alternativas": { "a": "se", "b": "enquanto sem contador", "c": "para", "d": "senao", "e": "literal" }, "correta": "c", "nivel": "medio", "pontos": 15, "usarTempo": true, "tempoLimite": 18, "bonusRapidezAtivo": true } ];
+
+        // ESTADO DO JOGO
+        let gameState = {
+            studentName: "",
+            mode: "estudos",
+            participateRanking: true,
+            currentQuestions: [],
+            currentIndex: 0,
+            score: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            streak: 0,
+            maxStreak: 0,
+            startTime: null,
+            totalTime: 0,
+            timerInterval: null,
+            questionStartTime: null,
+            categoriesCompleted: new Set(),
+            achievements: []
+        };
+
+        // SELEÇÃO DE MODO
+        function selectMode(mode, element) {
+            gameState.mode = mode;
+            document.querySelectorAll('.mode-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            const rankingOption = document.getElementById('ranking-option');
+            rankingOption.style.display = mode === 'competitivo' ? 'block' : 'none';
+        }
+
+        // INICIAR QUIZ
+        function startQuiz() {
+            const nameInput = document.getElementById('student-name');
+            if (!nameInput.value.trim()) {
+                alert("Por favor, insira seu nome para começar!");
+                return;
+            }
+
+            gameState.studentName = nameInput.value.trim();
+            gameState.participateRanking = document.getElementById('participate-ranking').checked;
+            
+            // Preparar questões (Embaralhar e pegar 10)
+            gameState.currentQuestions = [...questionsDB]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 10);
+            
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.streak = 0;
+            gameState.maxStreak = 0;
+            gameState.startTime = Date.now();
+            gameState.categoriesCompleted.clear();
+            gameState.achievements = [];
+
+            // UI Update
+            document.getElementById('display-student-name').textContent = gameState.studentName;
+            document.getElementById('display-mode').textContent = gameState.mode === 'estudos' ? '📚 MODO ESTUDOS' : '🏆 MODO COMPETITIVO';
+            document.getElementById('display-score').textContent = "0";
+            
+            if (gameState.mode === 'estudos') {
+                document.getElementById('display-score-label').style.display = 'none';
+                document.getElementById('display-score').style.display = 'none';
+            } else {
+                document.getElementById('display-score-label').style.display = 'block';
+                document.getElementById('display-score').style.display = 'block';
+            }
+
+            showScreen('quiz-screen');
+            loadQuestion();
+        }
+
+        // CARREGAR QUESTÃO
+        function loadQuestion() {
+            const question = gameState.currentQuestions[gameState.currentIndex];
+            
+            // Reset UI
+            document.getElementById('progress-bar').style.width = `${(gameState.currentIndex / 10) * 100}%`;
+            document.getElementById('question-counter').textContent = `Questão ${gameState.currentIndex + 1} de 10`;
+            document.getElementById('question-info').textContent = (question.categoria || "Geral").replace('_', ' ');
+            document.getElementById('question-text').textContent = question.pergunta;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            Object.entries(question.alternativas).forEach(([key, value]) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn animate-fade';
+                btn.innerHTML = `<span class="option-prefix">${key.toUpperCase()}</span> ${value}`;
+                btn.onclick = () => handleAnswer(key);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Timer Logic
+            const timerContainer = document.getElementById('timer-container');
+            if (gameState.mode === 'competitivo' && question.usarTempo) {
+                timerContainer.style.display = 'block';
+                startTimer(question.tempoLimite);
+            } else {
+                timerContainer.style.display = 'none';
+            }
+
+            gameState.questionStartTime = Date.now();
+        }
+
+        // TIMER
+        function startTimer(seconds) {
+            clearInterval(gameState.timerInterval);
+            let timeLeft = seconds;
+            const bar = document.getElementById('timer-bar');
+            const text = document.getElementById('timer-text');
+            
+            const updateUI = () => {
+                const percent = (timeLeft / seconds) * 100;
+                bar.style.width = `${percent}%`;
+                text.textContent = `${Math.ceil(timeLeft).toString().padStart(2, '0')}s`;
+                
+                if (timeLeft <= 5) bar.style.background = 'var(--danger)';
+                else bar.style.background = 'var(--primary)';
+            };
+
+            updateUI();
+
+            gameState.timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                updateUI();
+
+                if (timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleAnswer(null); // Tempo esgotado
+                }
+            }, 100);
+        }
+
+        // LÓGICA DE RESPOSTA
+        function handleAnswer(selectedKey) {
+            clearInterval(gameState.timerInterval);
+            const question = gameState.currentQuestions[gameState.currentIndex];
+            const isCorrect = selectedKey === question.correta;
+            const feedbackEl = document.getElementById('feedback');
+            
+            // Desabilitar botões
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                const key = btn.querySelector('.option-prefix').textContent.toLowerCase();
+                if (key === question.correta) btn.classList.add('correct');
+                if (key === selectedKey && !isCorrect) btn.classList.add('wrong');
+            });
+
+            if (isCorrect) {
+                gameState.correctCount++;
+                gameState.streak++;
+                if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+                
+                let pointsEarned = 0;
+                if (gameState.mode === 'competitivo') {
+                    pointsEarned = question.pontos || 10;
+                    
+                    // Bônus Rapidez
+                    if (question.usarTempo && selectedKey) {
+                        const timeTaken = (Date.now() - gameState.questionStartTime) / 1000;
+                        if (timeTaken <= 5) pointsEarned += 10;
+                        else if (timeTaken <= 10) pointsEarned += 7;
+                        else if (timeTaken <= 15) pointsEarned += 5;
+                        else if (timeTaken <= 20) pointsEarned += 3;
+                    }
+
+                    // Bônus Streak
+                    if (gameState.streak === 3) { pointsEarned += 10; addAchievement("🔥 Combo Triplo (+10)"); }
+                    if (gameState.streak === 5) { pointsEarned += 20; addAchievement("⚡ Combo 5x (+20)"); }
+                    if (gameState.streak === 8) { pointsEarned += 30; addAchievement("👑 Mestre do Combo (+30)"); }
+                }
+
+                gameState.score += pointsEarned;
+                showFeedback(true, pointsEarned);
+            } else {
+                gameState.wrongCount++;
+                gameState.streak = 0;
+                if (gameState.mode === 'competitivo') {
+                    gameState.score = Math.max(0, gameState.score - 3); // Penalidade leve
+                }
+                showFeedback(false);
+            }
+
+            document.getElementById('display-score').textContent = gameState.score;
+            
+            // Streak UI
+            const streakInfo = document.getElementById('streak-info');
+            if (gameState.streak >= 2) {
+                streakInfo.style.display = 'block';
+                document.getElementById('current-streak').textContent = gameState.streak;
+            } else {
+                streakInfo.style.display = 'none';
+            }
+
+            setTimeout(() => {
+                gameState.currentIndex++;
+                if (gameState.currentIndex < 10) {
+                    loadQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 2000);
+        }
+
+        // FEEDBACK VISUAL
+        function showFeedback(isCorrect, points = 0) {
+            const el = document.getElementById('feedback');
+            el.style.display = 'block';
+            el.className = isCorrect ? 'feedback-correct animate-fade' : 'feedback-wrong animate-fade';
+            el.innerHTML = isCorrect ? 
+                `<h2>CORRETO!</h2>${gameState.mode === 'competitivo' ? `<p>+${points} pontos</p>` : ''}` : 
+                `<h2>INCORRETO</h2><p>A resposta certa era a alternativa ${gameState.currentQuestions[gameState.currentIndex].correta.toUpperCase()}</p>`;
+            
+            setTimeout(() => { el.style.display = 'none'; }, 1800);
+        }
+
+        // FINALIZAR QUIZ
+        function finishQuiz() {
+            gameState.totalTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+            showScreen('result-screen');
+            
+            const accuracy = (gameState.correctCount / 10) * 100;
+            const level = getLevel(gameState.score);
+            
+            document.getElementById('result-name').textContent = gameState.studentName;
+            document.getElementById('res-score').textContent = gameState.score;
+            document.getElementById('res-accuracy').textContent = `${accuracy}%`;
+            document.getElementById('res-correct').textContent = gameState.correctCount;
+            document.getElementById('res-streak').textContent = gameState.maxStreak;
+            document.getElementById('result-level').textContent = level;
+
+            // Conquistas finais
+            if (accuracy === 100) addAchievement("🌟 Perfeição (100% de Acerto)");
+            if (gameState.totalTime < 60) addAchievement("🚀 Flash (Concluído em < 1min)");
+            
+            displayAchievements();
+
+            if (gameState.mode === 'competitivo' && gameState.participateRanking) {
+                saveToRanking();
+            }
+            
+            displayRanking();
+        }
+
+        // SISTEMA DE NÍVEIS
+        function getLevel(score) {
+            if (score >= 1000) return "Especialista em Algoritmos";
+            if (score >= 700) return "Mestre da Lógica";
+            if (score >= 450) return "Programador em Formação";
+            if (score >= 250) return "Explorador do Portugol";
+            if (score >= 100) return "Aprendiz de Algoritmos";
+            return "Iniciante da Lógica";
+        }
+
+        // CONQUISTAS
+        function addAchievement(text) {
+            if (!gameState.achievements.includes(text)) {
+                gameState.achievements.push(text);
+            }
+        }
+
+        function displayAchievements() {
+            const list = document.getElementById('achievements-list');
+            list.innerHTML = '';
+            if (gameState.achievements.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted);">Nenhuma conquista nesta rodada.</p>';
+                return;
+            }
+            gameState.achievements.forEach(ach => {
+                const badge = document.createElement('span');
+                badge.className = 'level-badge';
+                badge.style.background = 'var(--accent)';
+                badge.textContent = ach;
+                list.appendChild(badge);
+            });
+        }
+
+        // RANKING LOCALSTORAGE
+        function saveToRanking() {
+            let ranking = JSON.parse(localStorage.getItem('quiz_ranking') || '[]');
+            ranking.push({
+                name: gameState.studentName,
+                score: gameState.score,
+                correct: gameState.correctCount,
+                accuracy: (gameState.correctCount / 10) * 100,
+                date: new Date().toLocaleDateString('pt-BR')
+            });
+            
+            // Ordenar por pontos, depois por acertos
+            ranking.sort((a, b) => b.score - a.score || b.correct - a.correct);
+            
+            // Manter top 50
+            ranking = ranking.slice(0, 50);
+            localStorage.setItem('quiz_ranking', JSON.stringify(ranking));
+        }
+
+        function displayRanking() {
+            const ranking = JSON.parse(localStorage.getItem('quiz_ranking') || '[]');
+            const body = document.getElementById('ranking-body');
+            body.innerHTML = '';
+
+            if (ranking.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum registro ainda.</td></tr>';
+                return;
+            }
+
+            ranking.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                let rankDisplay = index + 1;
+                let rankClass = "";
+                
+                if (index === 0) { rankDisplay = '<span class="medal">🥇</span> 1º'; rankClass = "rank-1"; }
+                else if (index === 1) { rankDisplay = '<span class="medal">🥈</span> 2º'; rankClass = "rank-2"; }
+                else if (index === 2) { rankDisplay = '<span class="medal">🥉</span> 3º'; rankClass = "rank-3"; }
+                
+                row.innerHTML = `
+                    <td class="${rankClass}">${rankDisplay}</td>
+                    <td style="font-weight: 600;">${entry.name}</td>
+                    <td style="color: var(--accent); font-weight: 800;">${entry.score}</td>
+                    <td>${entry.correct}/10</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${entry.date}</td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        // UTILITÁRIOS DE TELA
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function restartGame() {
+            showScreen('start-screen');
+        }
+
+        // Inicializar ranking ao carregar
+        window.onload = () => {
+            displayRanking();
+        };
+    </script>
+</body>
+</html>
